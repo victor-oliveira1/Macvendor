@@ -51,6 +51,8 @@ def _macVerify(mac):
     return mac
 
 def _macSearch(mac):
+    mac = _macVerify(mac)
+    mac_original = _macFormatter(mac)
     mac_split = mac[:6]
     with open(OUI_FILE) as file:
         while True:
@@ -66,8 +68,6 @@ def _macSearch(mac):
                 break
 
 def MacLookup(mac):
-    mac = _macVerify(mac)
-    mac_original = _macFormatter(mac)
     mac_vendor = _macSearch(mac)
     if mac_vendor:
         print('{} - {}'.format(mac_original.upper(), mac_vendor))
