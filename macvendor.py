@@ -10,9 +10,16 @@ Library/CLI to determine the vendor of a MAC address.
 * The oui_file is needed for making use of this program, and
   can be downloaded using the "download_oui" function.
 
-CLI Example:
+CLI Examples:
 $ python3 macvendor.py 84:7b:eb:dd:ee:ff
 84:7b:eb:dd:ee:ff - Dell Inc.
+
+$ python3 macvendor.py 34-E6-D7-80-45-8F 34:e6:d7:80:45:8f 0011.9343.152e 00119343152e
+34-E6-D7-80-45-8F - Dell Inc.
+34:e6:d7:80:45:8f - Dell Inc.
+0011.9343.152e    - Cisco Systems, Inc
+00119343152e      - Cisco Systems, Inc
+
 
 Library Example:
 >>> import macvendor
@@ -23,13 +30,24 @@ import urllib.request
 import argparse
 import os.path
 import os
+from sys import platform
 
 __author__ = 'Victor Oliveira <victor.oliveira@gmx.com>'
 __version__ = '1.0'
 
-OUI_FILE = '~/.oui.txt'
+if platform == "linux" or platform == "linux2":
+    # linux
+    OUI_FILE = '~/.oui.txt'
+elif platform == "darwin":
+    # OS X
+    OUI_FILE = '~/.oui.txt'
+elif platform == "win32":
+    # Windows...
+    OUI_FILE = '~\\.oui.txt'
+#OUI_FILE = '~/.oui.txt'
 OUI_URL = 'http://standards-oui.ieee.org/oui.txt'
-SEPARATORS = ('-', ':')
+#SEPARATORS = ('-', ':')
+SEPARATORS = ('-', ':', '.')
 BUFFER_SIZE = 1024 * 8
 
 def _req_oui():
@@ -48,7 +66,7 @@ def _get_oui_remote_size():
 
 def download_oui(oui_file=OUI_FILE):
     req = _req_oui()
-    with open(os.path.expanduser(oui_file), 'wb') as file:
+    with open(os.path.expanduser(oui_file), "wb") as file:
         while True:
             buffer = req.read(BUFFER_SIZE)
             if buffer:
@@ -57,7 +75,7 @@ def download_oui(oui_file=OUI_FILE):
                 break
 
 def get_vendor(mac, oui_file=OUI_FILE):
-    mac_clean = mac
+    mac_clean = mac.upper()
     for separator in SEPARATORS:
         mac_clean = ''.join(mac_clean.split(separator))
 
@@ -70,7 +88,7 @@ def get_vendor(mac, oui_file=OUI_FILE):
     if mac_size > 12 or mac_size < 6:
         raise ValueError('Invalid MAC address.')
 
-    with open(os.path.expanduser(oui_file)) as file:
+    with open(os.path.expanduser(oui_file), encoding="utf8") as file:
         mac_half = mac_clean[0:6]
         mac_half_upper = mac_half.upper()
         while True:
@@ -86,7 +104,8 @@ def _cli():
     parser = argparse.ArgumentParser(
         description='Return vendor of a MAC address.')
     parser.add_argument('mac_address',
-                      help='MAC address')
+                        nargs='+',
+                        help='MAC address')
     args = parser.parse_args()
     mac = args.mac_address
 
@@ -114,8 +133,9 @@ def _cli():
             exit(1)
 
     try:
-        vendor = get_vendor(mac)
-        print('{} - {}'.format(mac, vendor))
+        for i in mac:
+            vendor = get_vendor(i.upper())
+            print('{:17s} - {}'.format(i, vendor))
     except ValueError:
         print('Invalid MAC address.')
 
