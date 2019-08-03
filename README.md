@@ -5,8 +5,8 @@ You can also provide a text file containing various mac addresses (one per line)
 This script download a little text file containing all MAC vendors, and search based on this file.  
 If you have problem in finding some vendor, you can use the param "-r" to re-download the file again.  
   
-Supports 3 MAC formats:  
-aabbccddeeff, aa:bb:cc:dd:ee:ff or aa-bb-cc-dd-ee-ff
+Supports 4 MAC formats:  
+aabbccddeeff, aa:bb:cc:dd:ee:ff, aa-bb-cc-dd-ee-ff or aabb.ccdd.eeff
 
 UPDATE 25/03/2018!  
 Now, it can be used as library.  
